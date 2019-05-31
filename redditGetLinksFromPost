@@ -1,0 +1,5 @@
+#!/bin/bash
+cd /Users/morpheous/WORKSPACE/PYTHON/SubredditExtractLinks
+source /Users/morpheous/WORKSPACE/PYTHON/SubredditExtractLinks/venv/bin/activate
+python main.py $1
+deactivate

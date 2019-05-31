@@ -1,0 +1,4 @@
+#!/bin/bash
+virtualenv -p $(which python3) venv
+echo "source venv/bin/activate" > source
+chmod +x source

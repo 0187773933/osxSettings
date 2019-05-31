@@ -1,0 +1,2 @@
+#!/bin/bash
+lunchy restart com.symless.synergy.synergy-service
