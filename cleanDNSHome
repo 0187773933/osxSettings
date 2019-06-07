@@ -39,10 +39,6 @@ sudo route add default 192.168.0.1
 # sudo route delete default -ifscope en0
 # sudo route add default 192.168.1.1 -ifscope en0
 
-# sudo ifconfig bridge0 create
-# sudo ifconfig bridge0 addm en0 addm en1
-# sudo ifconfig bridge0 up
-
 echo ""
 echo "Current DNS Config = "
 networksetup -getdnsservers $currentservice
@@ -50,11 +46,8 @@ networksetup -getdnsservers $currentservice
 sudo dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 
-# Normal , just set to Google
-#networksetup -setdnsservers Wi-Fi 8.8.8.8
-
-# Normal 2 , set to OpenDNS , then Google
-networksetup -setdnsservers Wi-Fi 208.67.222.222 208.67.220.220 8.8.8.8
+# With Pi-Hole setup on Raspberry Pi's IP
+networksetup -setdnsservers Wi-Fi 192.168.0.105  8.8.8.8
 
 echo ""
 echo "New DNS Config = "
