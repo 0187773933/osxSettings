@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "[InternetShortcut]" > NewLink.url
+echo "URL=$1" >> NewLink.url
