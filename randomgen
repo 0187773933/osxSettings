@@ -1,0 +1,8 @@
+#!/bin/bash
+output=`pwgen -s -1 -y $1`
+
+# Regular Linx Clipboard
+#echo -n $output | xclip -selection c
+
+# OSX XQuartz Pepega
+echo $output | pbcopy

@@ -1,0 +1,9 @@
+#!/bin/bash
+output=`awk -v min=0 -v max=9 -v freq=$1 'BEGIN{srand(); for(i=0;i<freq;i++)printf int(min+rand()*(max-min+1))}'`
+echo $output
+
+# Regular Linx Clipboard
+#echo -n $output | xclip -selection c
+
+# OSX XQuartz Pepega
+echo $output | pbcopy
