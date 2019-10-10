@@ -1,3 +1,6 @@
 #!/bin/bash
 # https://windowsloop.com/download-m3u8-video-with-ffmpeg/
+# https://chrome.google.com/webstore/detail/native-hls-playback/emnphkkblegpebimobpbekeedfgemhof
+# https://chrome.google.com/webstore/detail/hls-downloader/apomkbibleomoihlhhdbeghnfioffbej
+# https://chrome.google.com/webstore/detail/stream-recorder-download/iogidnfllpdhagebkblkgbfijkbkjdmm
 ffmpeg -i $1 -c copy -bsf:a aac_adtstoasc "output.mp4"
