@@ -1,0 +1,6 @@
+#!/bin/bash
+# Have to Enable 'Remote Login' Service in System Preferences -> Sharing
+/usr/local/bin/autossh -M 10051 -f -N -R 10052:localhost:22 macbook@$RELAY_MAIN_IP \
+-o ServerAliveInterval=60 -o ServerAliveCountMax=3 -o IdentitiesOnly=yes \
+-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR \
+-i /Users/$USER/.ssh/relaymainconnector
