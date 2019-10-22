@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+import os
+import sys
+import subprocess
+
+def get_subdirectories_of_parent_directory( parent_directory ):
+	parent_directory = os.path.abspath( parent_directory )
+	print( parent_directory )
+	parent_directory_list = []
+	directory_names = []
+	for path , subdirs , files in os.walk( parent_directory ):
+		if len( subdirs ) > 0:
+			for i , directory in enumerate( subdirs ):
+				directory_names.append( directory )
+				parent_directory_list.append( os.path.abspath( os.path.join( path , directory ) ) )
+	return [ sorted( parent_directory_list ) , sorted( directory_names ) ]
+
+def build_file_list_for_each_directory( sub_directories ):
+	directory_structure = []
+	for i , directory in enumerate( sub_directories ):
+		print( directory )
+		item = []
+		for file in os.listdir( directory ):
+			if file.endswith( ".mp3" ):
+				item.append( os.path.abspath( os.path.join( directory , file ) ) )
+		directory_structure.append( sorted( item ) )
+	return sorted( directory_structure )
+
+
+# 1.) Build 'Sane' Folder Object
+sub_directories , directory_names = get_subdirectories_of_parent_directory( sys.argv[ 1 ] )
+directory_structure = build_file_list_for_each_directory( sub_directories )
+#print( directory_structure[ 0 ] )
+
+# 2.) Create a 'COMBINED' Folder in the Parent Directory
+if not os.path.exists( os.path.join( sys.argv[ 1 ] , "COMBINED" ) ):
+    os.makedirs( os.path.join( sys.argv[ 1 ] , "COMBINED" ) )
+
+# 3.) Combine Each Subdirectory to Single MP3 Text File List for FFMPEG
+for i , sub_directory in enumerate( directory_structure ):
+	# unreal https://stackoverflow.com/a/57547025
+	text_file_path = os.path.abspath( os.path.join( sys.argv[ 1 ] , "COMBINED" , directory_names[ i ] + ".txt" ) )
+	with open( text_file_path , "a" ) as text_file:
+		for i , file_name in enumerate( sub_directory ):
+			text_file.write( "file '" + file_name + "'\n" )
+
+
+# 4.) Use FFMPEG to Combine All mp3's
+for path , subdirs , files in os.walk( os.path.join( sys.argv[ 1 ] , "COMBINED" ) ):
+	for file in files:
+		name = file.split( ".txt" )[ 0 ]
+		output_file_path = os.path.abspath( os.path.join( sys.argv[ 1 ] , "COMBINED" , name + ".mp3" ) )
+		print( output_file_path )
+		text_file_path = os.path.abspath( os.path.join( path , file ) )
+		print( text_file_path )
+		ffmpeg_command = 'ffmpeg -f concat -safe 0 -i "' + text_file_path + '" -c copy "' + output_file_path + '"'
+		print( ffmpeg_command )
+		#subprocess.call( ffmpeg_command , shell=True )
+		os.system( ffmpeg_command )
+		print( "end" )
