@@ -1,0 +1,8 @@
+#!/bin/bash
+mkdir ~/TMP2/
+mkdir ~/TMP2/WifiBackup
+sudo mv /Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist ~/TMP2/WifiBackup/com.apple.airport.preferences.plist
+sudo mv /Library/Preferences/SystemConfiguration/com.apple.network.identification.plist ~/TMP2/WifiBackup/com.apple.network.identification.plist
+sudo mv /Library/Preferences/SystemConfiguration/NetworkInterfaces.plist ~/TMP2/WifiBackup/NetworkInterfaces.plist
+sudo mv /Library/Preferences/SystemConfiguration/preferences.plist preferences.plist
+sudo reboot
