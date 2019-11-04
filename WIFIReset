@@ -1,4 +1,5 @@
 #!/bin/bash
+# https://apple.stackexchange.com/a/247654
 mkdir ~/TMP2/
 mkdir ~/TMP2/WifiBackup
 sudo mv /Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist ~/TMP2/WifiBackup/com.apple.airport.preferences.plist
