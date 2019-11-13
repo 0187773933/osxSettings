@@ -1,0 +1,20 @@
+#!/bin/bash
+
+defaultGateWay=$(route -n | awk '$4 == "UG" {print $2}')
+defaultInterface=$(ip link | awk -F: '$0 !~ "lo|vir|wl|^[^0-9]"{print $2;getline}')
+echo "Default Gateway = $defaultGateWay"
+echo "Default Interface = $defaultInterface"
+
+chromeCastIP=$(sudo nmap -sn $defaultGateWay/24 | grep 'F3:02' -A 1 | tail -1 | awk '{print $(NF)}' )
+echo "ChromeCast IP = $chromeCastIP"
+
+#sudo nmap -sn 192.168.1.0/24 | while read line; do
+#       echo $line | awk -F 'F3:02'
+#done
+#sudo arp-scan --interface=eth0 --localnet | while read line; do
+        #echo $line | awk -F 'f4:f5'
+#done
+
+url=$(youtube-dl 'https://www.twitch.tv/'$1 -g)
+echo $url
+castnow --address $chromeCastIP '$url'
