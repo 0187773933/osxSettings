@@ -1,0 +1,4 @@
+#!/bin/bash
+RaspberryPiIP=$(arp -na | grep "b8:27:eb:67:ae:53" | awk '{print $2}' | cut -d "(" -f2 | cut -d ")" -f1)
+echo $RaspberryPiIP
+sshpass -p raspberry ssh pi@$RaspberryPiIP -AY -o ServerAliveInterval=60
