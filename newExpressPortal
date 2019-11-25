@@ -1,0 +1,141 @@
+#!/bin/bash
+NAME=$1
+
+# Setup Folder and File Structure
+mkdir controllers
+mkdir curl_scripts
+mkdir functions
+mkdir routes
+mkdir public
+mkdir public/views
+mkdir public/js
+mkdir public/css
+touch server.js
+touch express_app.js
+touch public/views/index.html
+
+# Install Base NPM Packages
+npm init --yes
+rm package.json
+echo '{
+	"name": "ExpressPortal",
+	"version": "1.0.0",
+	"description": "",
+	"main": "server.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC"
+}' > package.json
+npm install express --save
+npm install body-parser --save
+npm install ejs --save
+npm install http --save
+npm install ip --save
+#npm install cors --save
+npm install jsonfile-obj-db --save
+npm install child_process --save
+
+# Write Startup Code
+echo '
+const express = require("express");
+const path = require("path");
+const bodyParser = require("body-parser");
+const cors = require( "cors" );
+const ejs = require("ejs");
+
+const app = express();
+const server = require("http").createServer(app);
+const port = process.env.PORT || 6969;
+
+// View Engine Setup
+app.set( "views" , path.join( __dirname , "public" , "views" ) );
+app.set( "view engine" , "ejs" );
+app.engine( "html" , ejs.renderFile );
+
+// Set Static Folder
+app.use( express.static( path.join( __dirname , "public"  ) ) );
+
+// Setup Middleware
+//app.use( bodyParser.json() );
+app.use( bodyParser.urlencoded( { extended: true } ) );
+
+
+// Cross-Origin Stuff
+// app.use( cors() );
+//
+// const whitelist = [ "http://localhost:6969/youtubeAuth" ,  "https://accounts.google.com" , "https://google.com" ];
+// const corsOptions = {
+//   origin: "*" ,
+//   methods: "GET,HEAD,PUT,PATCH,POST,DELETE" ,
+//   preflightContinue: true ,
+//   optionsSuccessStatus: 204 ,
+
+// }
+// // app.use(function(req, res, next) {
+// //   res.header("Access-Control-Allow-Origin", "*");
+// //   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+// //   next();
+// // });
+// app.get( "/youtubeAuth" , cors( corsOptions ) , function( req , res , next ) {
+//     res.render( "youtubeAuth.html" );
+// });
+
+
+// Main-Routes
+app.get( "/" , function( req , res , next ) {
+		res.render( "index.html" );
+});
+
+// app.get( "/form" , function( req , res , next ) {
+//     res.render( "form_controller.html" );
+// });
+
+// Commands-Routes
+// const commands_routes = require( "./routes/commands.js" );
+// app.use( "/commands/" , commands_routes );
+
+module.exports = app;
+' > express_app.js
+
+echo '
+const process = require( "process" );
+const http = require( "http" )
+const ip = require( "ip" );
+const JFODB = require( "jsonfile-obj-db" );
+
+process.on( "unhandledRejection" , function( reason , p ) {
+	console.error( reason, "Unhandled Rejection at Promise" , p );
+	console.trace();
+	process.exit( 1 );
+});
+process.on( "uncaughtException" , function( err ) {
+	console.error( err , "Uncaught Exception thrown" );
+	console.trace();
+	process.exit( 1 );
+});
+
+const port = process.env.PORT || 6969;
+const express_app = require( "./express_app.js" );
+
+( async ()=> {
+
+	const config_file = new JFODB( "last_known_google_home" );
+	if ( !config_file.self ) { config_file.self = {}; config_file.save(); }
+	module.exports.config_file = config_file;
+
+	const server = http.createServer( express_app );
+	server.listen( port , () => {
+		const localIP = ip.address();
+		console.log( "\tServer Started on :" );
+		console.log( "\thttp://" + localIP + ":" + port );
+		console.log( "\t\t or" );
+		console.log( "\thttp://localhost:" + port );
+	});
+
+})();
+' > server.js
+
+echo '<h1>Testing</h1>' > public/views/index.html
