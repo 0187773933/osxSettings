@@ -13,6 +13,10 @@ mkdir public/css
 touch server.js
 touch express_app.js
 touch public/views/index.html
+touch routes/commands.js
+touch controllers/commands.js
+touch functions/get_status.js
+touch curl_scripts/get_status.sh
 
 # Install Base NPM Packages
 npm init --yes
@@ -122,7 +126,7 @@ const express_app = require( "./express_app.js" );
 
 ( async ()=> {
 
-	const config_file = new JFODB( "last_known_google_home" );
+	const config_file = new JFODB( "config_file" );
 	if ( !config_file.self ) { config_file.self = {}; config_file.save(); }
 	module.exports.config_file = config_file;
 
@@ -139,3 +143,51 @@ const express_app = require( "./express_app.js" );
 ' > server.js
 
 echo '<h1>Testing</h1>' > public/views/index.html
+
+echo '
+const express = require( "express" );
+const router = express.Router();
+const controller = require( "../controllers/commands.js" );
+
+router.get( "/status" , controller.get_status );
+router.post( "/status" , controller.post_status );
+router.put( "/status" , controller.put_status );
+router.delete( "/status" , controller.delete_status );
+
+module.exports = router;
+' > routes/commands.js
+
+
+echo '
+const Status = require( "../functions/status.js" );
+
+module.exports.get_status = async ( req , res )=> {
+	console.log( "GET --> /commands/status/" );
+	const status = await Status();
+	console.log( status );
+	res.status( 200 );
+	res.json( status );
+};
+' > controllers/commands.js
+
+
+echo '
+function STATUS() {
+	return new Promise( function( resolve , reject ) {
+		try {
+			const status = { result: "asdf" };
+			resolve( status );
+			return;
+		}
+		catch( error ) { console.log( error ); reject( error ); return; }
+	});
+}
+module.exports = STATUS
+' > functions/status.js
+
+echo '
+#!/bin/bash
+curl http://localhost:6969/commands/status
+' > curl_scripts/get_status.js
+
+
