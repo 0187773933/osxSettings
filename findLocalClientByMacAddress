@@ -1,0 +1,121 @@
+#!/usr/bin/env node
+const process = require( "process" );
+const exec = require( "child_process" ).execSync;
+
+function darwin_get_interfaces() {
+	let results = [];
+	let interfaces = exec( `netstat -rn -A inet | while read line ; do echo $line | awk '{print $(NF)}' ; done` ).toString();
+	interfaces = interfaces.split( "\n" );
+	interfaces = interfaces.map( x => x.trim() );
+	for ( let i = 0; i < interfaces.length; ++i ) {
+		if ( interfaces[ i ] === "" ) { continue; }
+		if ( interfaces[ i ] === "!" ) { continue; }
+		if ( interfaces[ i ] === "tables" ) { continue; }
+		if ( interfaces[ i ] === "Expire" ) { continue; }
+		if ( interfaces[ i ] === "Internet:" ) { continue; }
+		if ( interfaces[ i ] === "Internet6:" ) { continue; }
+		if ( isNaN( interfaces[ i ] ) === false ) { continue; }
+		//console.log( `${ i.toString() } === ${ interfaces[ i ] }` );
+		results.push( interfaces[ i ] );
+	}
+	results = [ ...new Set( results ) ];
+	return results;
+}
+
+function darwin_get_default_gateway() {
+	return exec( `netstat -rn -f inet | grep -A 1 "Gateway" | tail -1 | awk '{print $2}'` ).toString().trim();
+}
+
+function darwin_prelim_scan( default_gateway="192.168.0.1" ) {
+	const prelim_nmap_scan = exec( `nmap -sP ${ default_gateway }/24` ).toString();
+	//console.log( prelim_nmap_scan );
+}
+
+function darwin_scan_interface_method_1( interface="en0" ) {
+	let results = [];
+	let clients = exec( `arp -na -i ${ interface }` ).toString();
+	clients = clients.split( "\n" );
+	for ( let i = 0; i < clients.length; ++i ) {
+		if ( clients[ i ] === "" ) { continue; }
+		//console.log( `${ i.toString() } === ${ clients[ i ] }` );
+		let item = clients[ i ].split( "? (" );
+		if ( !item ) { continue; }
+		if ( !item[ 1 ] ) { continue; }
+		let ip_address = item[ 1 ].split( ")" );
+		let mac_address;
+		if ( !ip_address ) { continue; }
+		if ( !ip_address[ 0 ] ) { continue; }
+		if ( !ip_address[ 1 ] ) { continue; }
+		mac_address = ip_address[ 1 ]
+		ip_address = ip_address[ 0 ];
+		mac_address = mac_address.split( "at " );
+		if ( !mac_address ) { continue; }
+		if ( !mac_address[ 0 ] ) { continue; }
+		if ( !mac_address[ 1 ] ) { continue; }
+		mac_address = mac_address[ 1 ];
+		mac_address = mac_address.split( " on" );
+		if ( !mac_address ) { continue; }
+		if ( !mac_address[ 0 ] ) { continue; }
+		if ( !mac_address[ 1 ] ) { continue; }
+		mac_address = mac_address[ 0 ];
+		results.push({ ip_address: ip_address , mac_address: mac_address });
+	}
+	return results;
+}
+
+function darwin_scan_interface_method_2( interface="eth0" ) {
+	const google_home_ip = exec( `sudo arp-scan --interface=${ interface } --localnet | grep "f4:f5:d8:cc:ad:b0" | awk '{print $1}'` ).toString().trim();
+}
+
+function darwin_scan_all_interfaces() {
+	const interfaces = darwin_get_interfaces();
+	// console.log( "\nInterfaces ===" );
+	// console.log( interfaces );
+
+	const default_gateway = darwin_get_default_gateway();
+	//console.log( `\nDefault Gateway === ${ default_gateway }` );
+
+	let local_clients = {};
+	for ( let i = 0; i < interfaces.length; ++i ) {
+		local_clients[ interfaces[ i ].toString() ] = darwin_scan_interface_method_1( interfaces[ i ] );
+	}
+	// console.log( "\nLocal Clients ===" );
+	// console.log( local_clients );
+	return { interfaces: interfaces , default_gateway: default_gateway , local_clients: local_clients }
+}
+
+function _darwin_find_client_by_mac_address( mac_address ) {
+	const interface_map = darwin_scan_all_interfaces();
+	//console.log( interface_map );
+	for ( let interface in interface_map[ "local_clients" ] ) {
+		for ( let i = 0; i < interface_map[ "local_clients" ][ interface ].length; ++i ) {
+			//console.log( interface_map[ "local_clients" ][ interface ][ i ][ "ip_address" ] + " ==== " + interface_map[ "local_clients" ][ interface ][ i ][ "mac_address" ] );
+			if ( interface_map[ "local_clients" ][ interface ][ i ][ "mac_address" ] === mac_address ) {
+				return {
+					interface: interface ,
+					...interface_map[ "local_clients" ][ interface ][ i ]
+				};
+			}
+		}
+	}
+	return false;
+}
+function darwin_find_client_by_mac_address( mac_address ) {
+	let result = _darwin_find_client_by_mac_address( mac_address );
+	if ( !result ) {
+		darwin_prelim_scan();
+		result = _darwin_find_client_by_mac_address( mac_address );
+		if ( !result ) {
+			return false;
+		}
+	}
+	return result;
+}
+
+( ()=> {
+
+	const matching_mac_address = process.argv[ 2 ] || "b8:27:eb:67:ae:53";
+	const client_info = darwin_find_client_by_mac_address( matching_mac_address );
+	console.log( client_info[ "ip_address" ] );
+
+})();
