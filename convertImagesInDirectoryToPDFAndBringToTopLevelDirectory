@@ -1,0 +1,107 @@
+#!/usr/bin/env python
+import os
+import sys
+import time
+#import img2pdf
+# from PIL import Image
+#from fpdf import FPDF
+
+# 0.) Parse Input
+if len( sys.argv ) < 2:
+	print( "No Directory Passed" )
+	sys.exit( 1 )
+base_directory = os.path.abspath( sys.argv[ 1 ] )
+
+def build_pdf_of_all_images_in_directory( directory ):
+	# print( "Listing: " + directory )
+	# List current working directory
+	# print("\t-" + "\n\t-".join( os.listdir( "." ) ) )
+	jpegs = [ f for f in os.listdir( "." ) if f.endswith( '.jpeg' ) ]
+	if jpegs is not None:
+		jpegs.sort()
+	jpgs = [ f for f in os.listdir( "." ) if f.endswith( '.jpg' ) ]
+	if jpgs is not None:
+		jpgs.sort()
+	pngs = [ f for f in os.listdir( "." ) if f.endswith( '.png' ) ]
+	if pngs is not None:
+		pngs.sort()
+	image_path_list = jpegs + jpgs + pngs
+	image_path_list.sort()
+	#print( image_path_list )
+	if not image_path_list:
+		#print( "No Images Found In " + directory )
+		return
+
+	pdf_file_path = directory.split( base_directory )[ 1 ] + ".pdf"
+	pdf_file_path = pdf_file_path.replace( "/" , "-" )
+	pdf_file_path = pdf_file_path[ 1: ]
+	if pdf_file_path == "pdf":
+		here = os.getcwd()
+		pdf_file_path = here.split( "/" )[ -1 ] + ".pdf"
+	pdf_file_path = os.path.join( base_directory , pdf_file_path )
+	#pdf_file_path = os.path.join( os.getcwd() , pdf_file_path )
+	print( "Saving: " + pdf_file_path )
+
+	# A.) Save via Pillow
+	# directory_images_pillow_object_list = []
+	# root_image_file_name = image_path_list.pop( 0 )
+	# root_image_pillow_object = Image.open( root_image_file_name )
+	# for index , image_path in enumerate( image_path_list ):
+	# 	pillow_image = Image.open( image_path )
+	# 	directory_images_pillow_object_list.append( pillow_image )
+	# root_image_pillow_object.save( pdf_file_path , "PDF" , resolution=100.0 , save_all=True , append_images=directory_images_pillow_object_list )
+
+	# B.) Save via FPDF
+	# pdf.image( image ,
+	# 	(self::A4_HEIGHT - $width ) / 2 ,
+	# 	(self::A4_WIDTH - $height) / 2 ,
+	# 	$width ,
+	# 	$height
+	# )
+	# 1700 x 2200 will give you a 17.71 x 22.91 inch page.
+	# pdf = FPDF()
+	# for image in image_path_list:
+	# 	# IDK
+	# 	# pillow_image = Image.open( image )
+	# 	# WIDTH , HEIGHT = pillow_image.size
+	# 	# print( "Image Width = " + str( WIDTH ) )
+	# 	# print( "Image Height = " + str( HEIGHT ) )
+	# 	# CENTER_X = WIDTH / 2
+	# 	# CENTER_Y = HEIGHT / 2
+	# 	# print( "Center X = " + str( CENTER_X ) )
+	# 	# print( "Center Y = " + str( CENTER_Y ) )
+	# 	pdf.add_page()
+	# 	pdf.image( image , w=0 , h=0 )
+	# pdf.output( pdf_file_path , "F" )
+
+	# C.) Save via img2pdf
+	# with open( pdf_file_path ,"wb" ) as f:
+	# 	f.write( img2pdf.convert( image_path_list ) )
+
+	# D.)'Save' via Convert
+	#os.system( "convert *.png foo.pdf" )
+	#final_save_path = os.path.join( os.getcwd() , pdf_file_path )
+	#print( "Saving To: " + final_save_path )
+	convert_command = "convert "
+	for index , image_path in enumerate( image_path_list ):
+		convert_command += '"' + image_path + '" '
+	convert_command += '"' + pdf_file_path + '"'
+	#print( convert_command )
+	os.system( convert_command )
+	time.sleep( 10 )
+
+# 1.) Get all the subdirectories of base_directory recursively and store them in a list:
+# https://stackoverflow.com/a/37644569
+print( base_directory )
+directories = [ os.path.abspath( x[ 0 ] ) for x in os.walk( base_directory ) ]
+#directories.remove( os.path.abspath( base_directory ) ) # If you don't want your main directory included
+total_directories = len( directories )
+total_directories_string = str( total_directories )
+
+# 2.) Build PDF From Images In Each Sub Folder of Base Directory
+directories.sort()
+for index , directory in enumerate( directories ):
+	print( str( index + 1 ) + " of " + total_directories_string )
+	# Change working Directory
+	os.chdir( directory )
+	build_pdf_of_all_images_in_directory( directory )
