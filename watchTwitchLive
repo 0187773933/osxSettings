@@ -1,0 +1,2 @@
+#!/bin/bash
+youtube-dl -q -o - https://www.twitch.tv/$1 | /Applications/IINA.app/Contents/MacOS/iina-cli --stdin
