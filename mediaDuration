@@ -1,0 +1,8 @@
+#!/bin/bash
+seconds=$(ffprobe -i "$1" -show_format -v quiet | sed -n 's/duration=//p' )
+miliseconds=$(echo $seconds | cut -d "." -f2 )
+seconds=$(echo $seconds | cut -d "." -f1)
+hours=$(( seconds / 3600 ))
+minutes=$(( ( seconds / 60 ) % 60 ))
+seconds=$(( seconds % 60 ))
+printf "%02d:%02d:%02d:%02d\n" $hours $minutes $seconds $miliseconds
