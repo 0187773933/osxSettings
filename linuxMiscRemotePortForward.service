@@ -7,7 +7,7 @@ After=network.target
 [Service]
 Restart=always
 RestartSec=20
-User=pi
+User=$LOCAL_USERNAME
 ExecStart=/usr/bin/ssh -N -L $PORT_ON_REMOTE_IP:localhost:$LOCAL_PORT $REMOTE_IP_USERNAME@$REMOTE_IP_ADDRESS -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -o IdentitiesOnly=yes  -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -F /dev/null -i /home/$LOCAL_USERNAME/.ssh/$REMOTE_IP_PRIVATE_KEY
 
 [Install]
