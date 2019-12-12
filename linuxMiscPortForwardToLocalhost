@@ -1,0 +1,3 @@
+#!/bin/bash
+# Binds Passed $1 Port ON LinuxMisc VPS Server to Localhost
+ssh -N -L $1:localhost:$1 $LINUX_MISC_USER@$LINUX_MISC_IP -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -o IdentitiesOnly=yes  -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -F /dev/null -i /Users/$LOCAL_USER/.ssh/$LINUX_MISC_PRIVATE_KEY
