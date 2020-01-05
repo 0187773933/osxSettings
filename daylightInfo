@@ -1,0 +1,147 @@
+#!/usr/bin/env node
+const process = require( "process" );
+const path = require( "path" );
+const child = require( "child_process" );
+const global_package_path = child.spawnSync( "npm" , [ "root" , "-g" ] , { encoding: "utf8" } ).stdout.trim();
+const request = require( path.join( global_package_path ,  "request" ) );
+const resolver = require( path.join( global_package_path ,  "resolver" ) );
+const cheerio = require( path.join( global_package_path , "cheerio" ) );
+//const querystring = require( path.join( global_package_path , "querystring" ) );
+const ArgumentParser = require( path.join( global_package_path , "argparse" ) ).ArgumentParser;
+
+process.on( "unhandledRejection" , function( reason , p ) {
+	console.error( reason, "Unhandled Rejection at Promise" , p );
+	console.trace();
+});
+process.on( "uncaughtException" , function( err ) {
+	console.error( err , "Uncaught Exception thrown" );
+	console.trace();
+});
+
+const parser = new ArgumentParser({
+	version: "0.0.1" ,
+	addHelp: true ,
+	description: "Sunrise, Sunset, and Last Light Info"
+});
+
+parser.addArgument(
+	[ '-s', '--search' ] ,
+	{
+		help: "Attempts to Find Location Data via Search"
+	}
+);
+parser.addArgument(
+	[ '-l', '--location' ] ,
+	{
+		help: "Searches Location via 'Known' URL Path"
+	}
+);
+
+function MAKE_REQUEST( wURL ) {
+	return new Promise( function( resolve , reject ) {
+		try {
+			request( { url: wURL , headers: { "Cache-Control": "private, no-store, max-age=0" } } , function ( err , response , body ) {
+				if ( err ) { resolve( false ); return; }
+				//console.log( wURL + "\n\t--> RESPONSE_CODE = " + response.statusCode.toString() );
+				if ( response.statusCode !== 200 ) {
+					//console.log( "bad status code ... " );
+					resolve( false );
+					return;
+				}
+				else {
+					resolve( body );
+					return;
+				}
+			});
+		}
+		catch( error ) { console.log( error ); reject( error ); }
+	});
+}
+
+const _API_URL_BASE = "https://sunrisesunset.willyweather.com";
+const _SEARCH_URL_BASE = `${ _API_URL_BASE }/search/search.html?query=`;
+function SEARCH( query ) {
+	return new Promise( async function( resolve , reject ) {
+		try {
+			const url = `${ _SEARCH_URL_BASE }${ encodeURIComponent( query ) }`;
+			console.log( url );
+			const body = await MAKE_REQUEST( url );
+			try { var $ = cheerio.load( body ); }
+			catch( err ) { reject( "cheerio load failed" ); return false; }
+			let top_location = $( "ul.search-results-list" ).find( "a" );
+			let top_location_url = $( top_location[ 0 ] ).attr( "href" );
+			if ( !top_location_url ) {
+				resolver.resolve( url , ( err , x_url , filename , contentType )=> {
+					resolve( x_url )
+					return;
+				});
+			}
+			else {
+				top_location_url = `${ _API_URL_BASE }${ top_location_url }`;
+				resolve( top_location_url );
+				return;
+			}
+		}
+		catch( error ) { console.log( error ); reject( error ); return; }
+	});
+}
+
+function GET_DATA( location_url ) {
+	return new Promise( async function( resolve , reject ) {
+		try {
+			const body = await MAKE_REQUEST( location_url );
+			try { var $ = cheerio.load( body ); }
+			catch( err ) { reject( "cheerio load failed" ); return false; }
+			let forcast_data = [];
+			let forcast_element = $( "section.forecast" ).children()[ 0 ];
+			let days = $( forcast_element ).find( "ul" ).children();
+			for ( let i = 0; i < days.length; ++i ) {
+				let timestamp = $( days[ i ] ).find( "time" );
+				timestamp = $( timestamp ).attr( "datetime" );
+				if ( !timestamp ) { continue; }
+				let day_object = { date: timestamp };
+				//console.log( `\nDay ${ ( i + 1 ).toString() } === ${ timestamp }` );
+				let day_info = $( days[ i ] ).find( "ul" ).children();
+				for( let j = 0; j < day_info.length; ++j ) {
+					let type = $( day_info[ j ] ).find( "h3" ).text().trim();
+					let time = $( day_info[ j ] ).find( "span" ).text().trim();
+					//console.log( `${ type } === ${ time }` );
+					switch( type ) {
+						case "First Light":
+							day_object.last_light = time;
+							break;
+						case "Sunrise":
+							day_object.sunrise = time;
+							break;
+						case "Sunset":
+							day_object.sunset = time;
+							break;
+						case "Last Light":
+							day_object.last_light = time;
+							break;
+						default:
+							break;
+					}
+				}
+				forcast_data.push( day_object );
+			 }
+			resolve( forcast_data );
+			return;
+		}
+		catch( error ) { console.log( error ); reject( error ); return; }
+	});
+}
+
+( async ()=> {
+
+	const args = parser.parseArgs();
+	console.log( args );
+	let location = args.location;
+	if ( args.search ) {
+		location = await SEARCH( args.search );
+	}
+	console.log( location );
+	const data = await GET_DATA( location );
+	console.log( data );
+
+})();
