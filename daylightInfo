@@ -108,7 +108,7 @@ function GET_DATA( location_url ) {
 					//console.log( `${ type } === ${ time }` );
 					switch( type ) {
 						case "First Light":
-							day_object.last_light = time;
+							day_object.first_light = time;
 							break;
 						case "Sunrise":
 							day_object.sunrise = time;
