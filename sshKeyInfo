@@ -1,0 +1,2 @@
+#!/bin/bash
+for key in ~/.ssh/*; do ssh-keygen -l -f "${key}"; done | uniq
