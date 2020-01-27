@@ -1,0 +1,18 @@
+#!/bin/bash
+# Install
+# https://github.com/protocolbuffers/protobuf/releases
+# https://github.com/opencoff/sigtool
+
+ArchiveName=$(basename $1 | cut -d. -f1)
+CurrentDirectory=$(pwd)
+PrivateKey=$2
+
+# 1.) Decrypt Archive
+sigtool decrypt -o $ArchiveName.tar.bz2 $PrivateKey $1 
+
+# 2.) Extract Archive
+mkdir $CurrentDirectory/$ArchiveName
+tar -xjvf $ArchiveName.tar.bz2 -C $CurrentDirectory/$ArchiveName
+
+# 3.) Cleanup Decrypted Archive
+rm $ArchiveName.tar.bz2

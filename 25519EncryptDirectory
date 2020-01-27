@@ -1,0 +1,16 @@
+#!/bin/bash
+# Install
+# https://github.com/protocolbuffers/protobuf/releases
+# https://github.com/opencoff/sigtool
+
+ArchiveName=$(basename $1)
+PublicKey=$2
+
+# 1.) Create Archive
+tar -cjf $ArchiveName.tar.bz2 -C $1 .
+
+# 2.) Encrypt Archive
+sigtool encrypt $PublicKey -o $ArchiveName.tar.bz2.enc $ArchiveName.tar.bz2
+
+# 3.) Cleanup UnEncrypted Archive
+rm $ArchiveName.tar.bz2
