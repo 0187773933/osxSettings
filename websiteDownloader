@@ -1,0 +1,4 @@
+#!/bin/bash
+# https://stackoverflow.com/a/20063874
+wget --no-clobber --convert-links --random-wait -r -p -E -e robots=off -U mozilla $1
+
