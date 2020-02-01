@@ -70,21 +70,27 @@ def getUsersFollowing( username , user_id ):
 
 
 
+
 if len( sys.argv ) < 2:
 	sys.exit( 1 )
 
-print( sys.argv[ 1 ] )
 user = getUserInfo( sys.argv[ 1 ] )
-print( user[ "users" ][ 0 ][ "_id" ] )
-print( user[ "users" ][ 0 ][ "logo" ] )
 channel = getChannelInfo( user[ "users" ][ 0 ][ "_id" ] )
-#print( channel )
-print( channel[ "profile_banner" ] )
-print( channel[ "video_banner" ] )
-print( user[ "users" ][ 0 ] )
 followers = getUsersFollowers( user[ "users" ][ 0 ][ "_id" ] )
+following = getUsersFollowing( sys.argv[ 1 ] , user[ "users" ][ 0 ][ "_id" ] )
+
+print( "Username === " + sys.argv[ 1 ] )
+print( "User ID === " + str( user[ "users" ][ 0 ][ "_id" ] ) )
+print( "Created @ === " + user[ "users" ][ 0 ][ "created_at" ] )
+
+# Profile Pictures and Stuff
+print( user[ "users" ][ 0 ][ "logo" ] )
+if channel[ "profile_banner" ] is not None:
+	print( channel[ "profile_banner" ] )
+if channel[ "video_banner" ] is not None:
+	print( channel[ "video_banner" ] )
+
 print( "\nFollowers ===" )
 print( followers )
 print( "\nFollowing ===" )
-following = getUsersFollowing( sys.argv[ 1 ] , user[ "users" ][ 0 ][ "_id" ] )
 print( following )
