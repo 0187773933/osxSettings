@@ -12,8 +12,6 @@ import json
 CLIENT_ID = ""
 
 # https://dev.twitch.tv/docs/v5/reference/users/#get-user-by-id
-
-
 def getUserInfo( username ):
 	headers = {
 		'Accept': 'application/vnd.twitchtv.v5+json' ,
@@ -43,11 +41,15 @@ def getUsersFollowers( channel_id ):
 	}
 	params = (
 		( 'channel_id' , channel_id ) ,
+		( 'limit' , 100 ) ,
 	)
 	url = 'https://api.twitch.tv/kraken/channels/' + channel_id + '/follows'
 	response = requests.get( url , headers=headers , params=params )
 	result = json.loads( response.text )
-	return result
+	usernames = []
+	for i , user_info in enumerate( result[ "follows" ] ):
+		usernames.append( user_info[ "user" ][ "name" ] )
+	return usernames
 
 
 # https://dev.twitch.tv/docs/v5/reference/users#get-user-follows
@@ -67,8 +69,6 @@ def getUsersFollowing( username , user_id ):
 	for i , user_info in enumerate( result[ "follows" ] ):
 		usernames.append( user_info[ "channel" ][ "name" ] )
 	return usernames
-
-
 
 
 if len( sys.argv ) < 2:
