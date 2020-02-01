@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+import sys
+import requests
+import json
+
+# How to Find Client ID , 31JAN2020
+# 1.) Go to Someones Twitch Page
+# 2.) Open Chrome Dev Tools , Network Tab
+# 3.) Follow User
+# 4.) POST Request for https://gql.twitch.tv/gql should be made
+# Find "Client-Id:" in Request Headers
+CLIENT_ID = ""
+
+# https://dev.twitch.tv/docs/v5/reference/users/#get-user-by-id
+
+
+def getUserInfo( username ):
+	headers = {
+		'Accept': 'application/vnd.twitchtv.v5+json' ,
+		'Client-ID': CLIENT_ID ,
+	}
+	params = (
+		( 'login' , username ) ,
+	)
+	response = requests.get( 'https://api.twitch.tv/kraken/users' , headers=headers , params=params )
+	result = json.loads( response.text )
+	return result
+
+def getChannelInfo( user_id ):
+	headers = {
+		'Accept': 'application/vnd.twitchtv.v5+json' ,
+		'Client-ID': CLIENT_ID ,
+	}
+	response = requests.get( 'https://api.twitch.tv/kraken/channels/' + str( user_id ) , headers=headers )
+	result = json.loads( response.text )
+	return result
+
+# https://api.twitch.tv/kraken/channels/cosmowright/follows/?limit=100
+def getUsersFollowers( channel_id ):
+	headers = {
+		'Accept': 'application/vnd.twitchtv.v5+json' ,
+		'Client-ID': CLIENT_ID ,
+	}
+	params = (
+		( 'channel_id' , channel_id ) ,
+	)
+	url = 'https://api.twitch.tv/kraken/channels/' + channel_id + '/follows'
+	response = requests.get( url , headers=headers , params=params )
+	result = json.loads( response.text )
+	return result
+
+
+# https://dev.twitch.tv/docs/v5/reference/users#get-user-follows
+# Need to Increment through Batches of 100
+def getUsersFollowing( username , user_id ):
+	headers = {
+		'Accept': 'application/vnd.twitchtv.v5+json' ,
+		'Client-ID': CLIENT_ID ,
+	}
+	params = (
+		( 'limit' , 100 ) ,
+	)
+	url = 'https://api.twitch.tv/kraken/users/' + str( user_id ) + '/follows/channels'
+	response = requests.get( url , headers=headers , params=params )
+	result = json.loads( response.text )
+	usernames = []
+	for i , user_info in enumerate( result[ "follows" ] ):
+		usernames.append( user_info[ "channel" ][ "name" ] )
+	return usernames
+
+
+
+if len( sys.argv ) < 2:
+	sys.exit( 1 )
+
+print( sys.argv[ 1 ] )
+user = getUserInfo( sys.argv[ 1 ] )
+print( user[ "users" ][ 0 ][ "_id" ] )
+print( user[ "users" ][ 0 ][ "logo" ] )
+channel = getChannelInfo( user[ "users" ][ 0 ][ "_id" ] )
+#print( channel )
+print( channel[ "profile_banner" ] )
+print( channel[ "video_banner" ] )
+print( user[ "users" ][ 0 ] )
+followers = getUsersFollowers( user[ "users" ][ 0 ][ "_id" ] )
+print( "\nFollowers ===" )
+print( followers )
+print( "\nFollowing ===" )
+following = getUsersFollowing( sys.argv[ 1 ] , user[ "users" ][ 0 ][ "_id" ] )
+print( following )
