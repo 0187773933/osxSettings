@@ -1,0 +1,12 @@
+#!/usr/local/Cellar/ocrmypdf/9.0.3/libexec/bin/python3.7
+# EASY-INSTALL-ENTRY-SCRIPT: 'ocrmypdf==9.0.3','console_scripts','ocrmypdf'
+__requires__ = 'ocrmypdf==9.0.3'
+import re
+import sys
+from pkg_resources import load_entry_point
+
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
+    sys.exit(
+        load_entry_point('ocrmypdf==9.0.3', 'console_scripts', 'ocrmypdf')()
+    )
