@@ -1,0 +1,161 @@
+#! /usr/bin/env python3
+import requests
+
+# 1.) Use Chrome Dev Tools to Get Curl Commands
+# 2.) Convert Curl to Python https://curl.trillworks.com/
+# 3.) Populate Cookies and Data Params with Usernames and Passwords
+
+class ZoomCableModem:
+	def __init__( self ):
+		self.session = requests.Session()
+
+	def login( self ):
+		headers = {
+			'Connection': 'keep-alive',
+			'Pragma': 'no-cache',
+			'Cache-Control': 'no-cache',
+			'Origin': 'http://192.168.0.1',
+			'Upgrade-Insecure-Requests': '1',
+			'DNT': '1',
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
+			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+			'Referer': 'http://192.168.0.1/login.asp',
+			'Accept-Encoding': 'gzip, deflate',
+			'Accept-Language': 'en-GB,en;q=0.9,en-US;q=0.8,es;q=0.7',
+		}
+		data = {
+		  'loginUsername': '',
+		  'loginPassword': ''
+		}
+		login_response = self.session.post( 'http://192.168.0.1/goform/login' , headers=headers, data=data, verify=False, allow_redirects=True)
+		print( login_response.text )
+
+	def status( self ):
+		headers = {
+			'Connection': 'keep-alive',
+			'Pragma': 'no-cache',
+			'Cache-Control': 'no-cache',
+			'DNT': '1',
+			'Upgrade-Insecure-Requests': '1',
+			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
+			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+			'Referer': 'http://192.168.0.1/RgDiagnostics.asp',
+			'Accept-Encoding': 'gzip, deflate',
+			'Accept-Language': 'en-GB,en;q=0.9,en-US;q=0.8,es;q=0.7',
+		}
+		status_respone = self.session.get('http://192.168.0.1/RgConnect.asp', headers=headers, verify=False , allow_redirects=True )
+		print( status_respone.text )
+
+	def reboot( self ):
+		headers = {
+			'Connection': 'keep-alive',
+			'Pragma': 'no-cache',
+			'Cache-Control': 'no-cache',
+			'Origin': 'http://192.168.0.1',
+			'Upgrade-Insecure-Requests': '1',
+			'DNT': '1',
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
+			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+			'Referer': 'http://192.168.0.1/RgSecurity.asp',
+			'Accept-Encoding': 'gzip, deflate',
+			'Accept-Language': 'en-GB,en;q=0.9,en-US;q=0.8,es;q=0.7',
+		}
+		data = {
+		  'UserId': '',
+		  'OldPassword': '',
+		  'Password': '',
+		  'PasswordReEnter': '',
+		  'ResRebootYes': '0x01',
+		  'RestoreFactoryNo': '0x00',
+		  'RgRouterBridgeMode': '1'
+		}
+		reboot_response = self.session.post('http://192.168.0.1/goform/RgSecurity', headers=headers, data=data, verify=False , allow_redirects=True )
+		print( reboot_response.text )
+
+	def restart( self ):
+		self.login()
+		self.status()
+		self.reboot()
+
+
+class TPLinkRouter:
+	def __init__( self ):
+		self.session = requests.Session()
+
+	def login( self ):
+		cookies = {
+			'Authorization': '',
+		}
+		headers = {
+			'Connection': 'keep-alive',
+			'Pragma': 'no-cache',
+			'Cache-Control': 'no-cache',
+			'Upgrade-Insecure-Requests': '1',
+			'DNT': '1',
+			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
+			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+			'Referer': 'http://192.168.1.1/',
+			'Accept-Encoding': 'gzip, deflate',
+			'Accept-Language': 'en-GB,en;q=0.9,en-US;q=0.8,es;q=0.7',
+		}
+		login_response = self.session.get('http://192.168.1.1/', headers=headers, cookies=cookies, verify=False , allow_redirects=True)
+		print( login_response )
+
+	def status( self ):
+		cookies = {
+			#base64 encoded , then url encoded username:password
+			'Authorization': ''
+		}
+		headers = {
+			'Connection': 'keep-alive',
+			'Pragma': 'no-cache',
+			'Cache-Control': 'no-cache',
+			'Upgrade-Insecure-Requests': '1',
+			'DNT': '1',
+			'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
+			'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+			'Referer': 'http://192.168.1.1/',
+			'Accept-Encoding': 'gzip, deflate',
+			'Accept-Language': 'en-GB,en;q=0.9,en-US;q=0.8,es;q=0.7',
+		}
+		status_response = self.session.get('http://192.168.1.1/userRpm/StatusRpm.htm', headers=headers, cookies=cookies, verify=False , allow_redirects=True)
+		print( status_response.text )
+
+	def reboot_1( self ):
+		cookies = {
+			  #base64 encoded , then url encoded username:password
+		    'Authorization': ''
+		}
+		headers = {
+		    'Connection': 'keep-alive',
+		    'Pragma': 'no-cache',
+		    'Cache-Control': 'no-cache',
+		    'Upgrade-Insecure-Requests': '1',
+		    'DNT': '1',
+		    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36',
+		    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+		    'Referer': 'http://192.168.1.1/',
+		    'Accept-Encoding': 'gzip, deflate',
+		    'Accept-Language': 'en-GB,en;q=0.9,en-US;q=0.8,es;q=0.7',
+		}
+		params = (
+		    ('Reboot', 'Reboot'),
+		)
+		reboot_response = self.session.get('http://192.168.1.1/userRpm/SysRebootRpm.htm', headers=headers, params=params, cookies=cookies, verify=False , allow_redirects=True)
+		#reboot_response = self.session.get('http://192.168.1.1/userRpm/SysRebootRpm.htm?Reboot=Reboot', headers=headers, cookies=cookies, verify=False)
+		print( reboot_response.text )
+
+	def restart( self ):
+		self.login()
+		self.status()
+		self.reboot_1()
+
+
+
+CableModem = ZoomCableModem()
+CableModem.restart()
+
+WifiRouter = TPLinkRouter()
+WifiRouter.restart()
