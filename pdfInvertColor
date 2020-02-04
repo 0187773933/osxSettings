@@ -1,0 +1,3 @@
+#!/bin/bash
+# https://github.com/Lyonk71/invert-pdf-color
+python3 /Users/morpheous/WORKSPACE/PYTHON/TMP2/invert-pdf-color/invert_pdf_color/invert.py "$1"
