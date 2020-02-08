@@ -1,0 +1,10 @@
+#!/bin/bash
+# $1 = Day
+# $2 = Month
+# $3 = Year
+# $4 = Hour
+# $5 = Minute
+# $6 = FilePath
+# touch -mt "Year-Month-Day-Hour-Minute" $6
+# echo "$3$2$1$4$5"
+touch -mt "$3$2$1$4$5" $6
