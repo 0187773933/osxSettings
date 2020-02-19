@@ -6,13 +6,11 @@ from shutil import copyfile
 base_path = sys.argv[ 1 ]
 output_directory_path = sys.argv[ 2 ]
 os.makedirs( output_directory_path , exist_ok=True )
-sorted_file_list = []
+
 sorted_file_list_io_tuples = []
 nameing_index = 0
 def traverse_directory( base_path ):
 	global nameing_index
-	global sorted_file_list
-	this_levels_files = []
 
 	# Get All of 'This' Locations Directories
 	sorted_dirs = [ f.name for f in os.scandir( base_path ) if f.is_dir() ]
