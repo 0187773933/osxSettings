@@ -1,0 +1,6 @@
+#!/bin/bash
+# https://github.com/quantum5/PDFSignatureRemover
+# wget https://ci.dmoj.ca/job/PDFSignatureRemover/lastSuccessfulBuild/artifact/target/PDFSignatureRemover-1.0-SNAPSHOT.jar -O PDFSignatureRemover.jar
+# $1 = Input File Path
+# $2 = Output File Path
+java -jar PDFSignatureRemover.jar $1 $2
