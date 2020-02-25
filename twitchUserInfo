@@ -9,7 +9,7 @@ import json
 # 3.) Follow User
 # 4.) POST Request for https://gql.twitch.tv/gql should be made
 # Find "Client-Id:" in Request Headers
-CLIENT_ID = "kimne78kx3ncx6brgo4mv6wki5h1ko"
+CLIENT_ID = ""
 
 # https://dev.twitch.tv/docs/v5/reference/users/#get-user-by-id
 
@@ -127,7 +127,7 @@ if channel[ "profile_banner" ] is not None:
 if channel[ "video_banner" ] is not None:
 	print( channel[ "video_banner" ] )
 
-print( "\nFollowers === " + str( followers ) + " === " )
+print( "\nFollowers === " + str( len( followers ) ) + " === " )
 print( followers )
 print( "\nFollowing === " + str( len( following ) ) + " ===" )
 print( following )
