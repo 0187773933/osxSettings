@@ -9,9 +9,11 @@ import json
 # 3.) Follow User
 # 4.) POST Request for https://gql.twitch.tv/gql should be made
 # Find "Client-Id:" in Request Headers
-CLIENT_ID = ""
+CLIENT_ID = "kimne78kx3ncx6brgo4mv6wki5h1ko"
 
 # https://dev.twitch.tv/docs/v5/reference/users/#get-user-by-id
+
+
 def getUserInfo( username ):
 	headers = {
 		'Accept': 'application/vnd.twitchtv.v5+json' ,
@@ -52,6 +54,25 @@ def getUsersFollowers( channel_id ):
 	return usernames
 
 
+def get_remaining_followers_batch( username , user_id , offset ):
+	headers = {
+		'Accept': 'application/vnd.twitchtv.v5+json' ,
+		'Client-ID': CLIENT_ID ,
+	}
+	params = (
+		( 'limit' , 100 ) ,
+		( 'offset' , offset ) ,
+	)
+	url = 'https://api.twitch.tv/kraken/users/' + str( user_id ) + '/follows/channels'
+	#print( params )
+	#print( url )
+	response = requests.get( url , headers=headers , params=params )
+	result = json.loads( response.text )
+	usernames = []
+	for i , user_info in enumerate( result[ "follows" ] ):
+		usernames.append( user_info[ "channel" ][ "name" ] )
+	return usernames
+
 # https://dev.twitch.tv/docs/v5/reference/users#get-user-follows
 # Need to Increment through Batches of 100
 def getUsersFollowing( username , user_id ):
@@ -68,6 +89,20 @@ def getUsersFollowing( username , user_id ):
 	usernames = []
 	for i , user_info in enumerate( result[ "follows" ] ):
 		usernames.append( user_info[ "channel" ][ "name" ] )
+	total_followers = int( result[ "_total" ] )
+	batch_offset = 99
+	total_retrieved = len( usernames )
+	# I'm sorry for while loop
+	while total_retrieved <= total_followers:
+		remaining_followers_batch = get_remaining_followers_batch( username , user_id , batch_offset )
+		if len( remaining_followers_batch ) <= 0:
+			break
+		#print( remaining_followers_batch )
+		usernames = usernames + remaining_followers_batch
+		total_retrieved = total_retrieved + len( remaining_followers_batch )
+		#print( str( len( usernames ) ) + " of " + str( total_followers ) )
+		batch_offset += 100
+
 	return usernames
 
 
@@ -77,7 +112,9 @@ if len( sys.argv ) < 2:
 user = getUserInfo( sys.argv[ 1 ] )
 channel = getChannelInfo( user[ "users" ][ 0 ][ "_id" ] )
 followers = getUsersFollowers( user[ "users" ][ 0 ][ "_id" ] )
+followers.sort()
 following = getUsersFollowing( sys.argv[ 1 ] , user[ "users" ][ 0 ][ "_id" ] )
+following.sort()
 
 print( "Username === " + sys.argv[ 1 ] )
 print( "User ID === " + str( user[ "users" ][ 0 ][ "_id" ] ) )
@@ -90,7 +127,7 @@ if channel[ "profile_banner" ] is not None:
 if channel[ "video_banner" ] is not None:
 	print( channel[ "video_banner" ] )
 
-print( "\nFollowers ===" )
+print( "\nFollowers === " + str( followers ) + " === " )
 print( followers )
-print( "\nFollowing ===" )
+print( "\nFollowing === " + str( len( following ) ) + " ===" )
 print( following )
