@@ -1,0 +1,10 @@
+#!/bin/bash
+RouteInfo=$(ip route ls | grep default)
+
+defaultInterface=$(echo $RouteInfo | awk '{print $NF}')
+defaultGateWay=$(echo $RouteInfo | awk '{ print $3 }')
+echo "Default Interface = $defaultInterface"
+echo "Default GateWay = $defaultGateWay"
+
+IPS=$(sudo nmap -sn $defaultGateWay/24 | grep 'F4:F5')
+echo $IPS

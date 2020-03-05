@@ -1,0 +1,4 @@
+#!/bin/bash
+# brew install switchaudio-osx
+SwitchAudioSource -t output -s 'MacBook Air Speakers'
+SwitchAudioSource -t output -s 'External Headphones'

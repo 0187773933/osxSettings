@@ -1,0 +1,4 @@
+#!/bin/bash
+# brew install switchaudio-osx
+echo "Output Device = $(SwitchAudioSource -t output -c)"
+echo "System Sounds Device = $(SwitchAudioSource -t system -c)"

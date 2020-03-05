@@ -1,0 +1,3 @@
+#!/bin/bash
+# brew install switchaudio-osx
+SwitchAudioSource -t input -c

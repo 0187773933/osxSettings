@@ -1,0 +1,5 @@
+#!/bin/bash
+ssh-add -D
+git config user.name "0187773933"
+git config user.email "win.stitch.23@gmail.com"
+ssh-add -k /Users/morpheous/.ssh/githubWinStitch
