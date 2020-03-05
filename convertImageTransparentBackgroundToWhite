@@ -1,0 +1,5 @@
+#!/bin/bash
+filename=$( basename "$1" | cut -d. -f1 )
+basedirectory=$( dirname "$1" )
+outputpath="${basedirectory}/${filename}.png"
+convert "$1" -background white -flatten "$outputpath"
