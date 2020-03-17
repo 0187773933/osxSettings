@@ -1,5 +1,12 @@
 #!/bin/bash
+# https://stackoverflow.com/a/3626205
+function is_int() { return $(test "$@" -eq "$@" > /dev/null 2>&1); }
 UserName=$(echo "$1" | awk -F/ '{print $NF}')
-TwitchURL="https://twitch.tv/$UserName"
+if $(is_int "${UserName}");
+	then
+	TwitchURL="https://twitch.tv/videos/$UserName"
+else
+	TwitchURL="https://twitch.tv/$UserName"
+fi
 DirectM3U8=$(youtube-dl -g --no-check-certificate "$TwitchURL")
 mpv --no-video "$DirectM3U8"
