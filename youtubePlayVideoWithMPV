@@ -1,0 +1,5 @@
+#!/bin/bash
+# https://mpv.io/manual/stable/#options-ytdl-format
+# Reinstall openssl , but nothing , wadu
+# https://github.com/ytdl-org/youtube-dl/issues/5317
+mpv "$1" --ytdl-raw-options=no-check-certificate=
