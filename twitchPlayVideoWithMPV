@@ -1,0 +1,5 @@
+#!/bin/bash
+UserName=$(echo "$1" | awk -F/ '{print $NF}')
+TwitchURL="https://twitch.tv/$UserName"
+DirectM3U8=$(youtube-dl -g --no-check-certificate "$TwitchURL")
+mpv "$DirectM3U8"
