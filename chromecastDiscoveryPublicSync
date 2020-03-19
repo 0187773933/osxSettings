@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+import sys
+import pychromecast
+import json
+from uuid import UUID
+import JSONFileOBJDB
+from pathlib import Path
+import redis
+
+# Add to crontab
+# */5 * * * * /bin/bash -l -c 'su pi -c "/usr/local/bin/chromecastDiscoveryPublicSync"' >/dev/null 2>&1
+
+# https://arthurpemberton.com/2015/04/fixing-uuid-is-not-json-serializable
+# https://docs.python.org/2/library/json.html
+class ComplexEncoder( json.JSONEncoder ):
+	def default( self , obj ):
+		if isinstance( obj , UUID ):
+			return str( obj )
+		return json.JSONEncoder.default( self , obj )
+
+ConfigDataBase = JSONFileOBJDB.create({
+		"posix_obj": Path( Path.home() , ".config" , "personal" , "chromecast_discovery_public_sync.json" )
+	})
+# Init Config DataBase
+# ConfigDataBase.self[ 'redis' ] = { 'host' : '' , 'port': '' , 'db': 0 , 'password': '' }
+# ConfigDataBase.self[ 'location' ] = '7291'
+# ConfigDataBase.self[ 'UUIDS' ] = {}
+# ConfigDataBase.save()
+
+# https://docs.objectrocket.com/redis_python_examples.html
+try:
+	connection = redis.StrictRedis(
+		host=ConfigDataBase.self[ 'redis' ][ 'host' ] ,
+		port=ConfigDataBase.self[ 'redis' ][ 'port' ] ,
+		db=ConfigDataBase.self[ 'redis' ][ 'db' ] ,
+		password=ConfigDataBase.self[ 'redis' ][ 'password' ] )
+	print( connection )
+	connection.ping()
+	print( 'Connected!' )
+except Exception as ex:
+	print( 'Error:' )
+	print( ex )
+	exit( 'Failed to connect, terminating.' )
+	sys.exit( 1 )
+
+chromecasts = pychromecast.get_chromecasts()
+for _cast in chromecasts:
+	cast_object = {}
+	info = vars( _cast )
+	cast_object[ 'ip' ] = info[ 'host' ]
+	cast_object[ 'port' ] = info[ 'port' ]
+	device_info = json.dumps( info[ 'device' ] , cls=ComplexEncoder )
+	if device_info.startswith( '[' ) and device_info.endswith( ']' ):
+		device_info = device_info[ 1 : -1 ]
+		# https://stackoverflow.com/a/2076399
+		device_info = device_info.split( '"' )[ 1 :: 2 ]
+		#print( device_info )
+		cast_object[ 'friendly_name' ] = device_info[ 0 ]
+		cast_object[ 'model_name' ] = device_info[ 1 ]
+		cast_object[ 'manufacturer' ] = device_info[ 2 ]
+		cast_object[ 'uuid' ] = device_info[ 3 ]
+		cast_object[ 'cast_type' ] = device_info[ 4 ]
+		cast_object[ 'location' ] = ConfigDataBase.self[ 'location' ]
+		print( cast_object )
+		ConfigDataBase.self[ 'UUIDS' ][ cast_object[ 'uuid' ] ] = cast_object
+		ConfigDataBase.save()
+		key = "UUIDS." + cast_object[ 'uuid' ]
+		connection.set( key , json.dumps( cast_object ) )
+		connection.set( "LOCATION." +  , json.dumps( cast_object ) )
